@@ -4,5 +4,5 @@ pub enum Value<'a> {
     Int(i64),
     String(&'a str),
     Bool(bool),
-    List(Vec<Value<'a>>)
+    List(Vec<Value<'a>>),
 }

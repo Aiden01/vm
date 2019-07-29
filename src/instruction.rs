@@ -5,7 +5,7 @@ pub enum Instr<'a> {
     Store(&'a str),
     Load(&'a str),
     BuildList(usize),
-    Binary(Binary)
+    Binary(Binary),
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -13,5 +13,5 @@ pub enum Binary {
     Add,
     Sub,
     Mult,
-    Div
+    Div,
 }

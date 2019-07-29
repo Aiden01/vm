@@ -1,5 +1,5 @@
 pub struct Stack<T> {
-    data: Vec<T>
+    data: Vec<T>,
 }
 
 impl<T: Clone> Stack<T> {
