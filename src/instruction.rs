@@ -4,5 +4,5 @@ pub enum Instr<'a> {
     JumpIfFalse(usize),
     Store(&'a str),
     Load(&'a str),
-    
+    BuildList(usize)
 }

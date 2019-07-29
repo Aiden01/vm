@@ -45,10 +45,9 @@ impl<'a> Vm<'a> {
             Instr::Jump(x) => self.set_pointer(x),
             Instr::Store(id) => self.store(id),
             Instr::Load(id) => self.load(id),
+            Instr::BuildList(n) => self.build_list(n),
             _ => unreachable!()
-        };
-
-        Ok(())
+        }
     }
 
     fn store(&mut self, id: &'a str) -> VmResult<'a, ()> {
@@ -60,6 +59,12 @@ impl<'a> Vm<'a> {
     fn load(&mut self, id: &'a str) -> VmResult<'a, ()> {
         let val = self.env.get(id).ok_or(VmError::NotInScope(id))?;
         self.stack.push(val.clone());
+        Ok(())
+    }
+
+    fn build_list(&mut self, n: usize) -> VmResult<'a, ()> {
+        let elems = self.stack.pop_n(n);
+        self.stack.push(Value::List(elems));
         Ok(())
     }
 
