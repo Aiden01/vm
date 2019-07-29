@@ -21,6 +21,12 @@ impl<T: Clone> Stack<T> {
         Some((first, last))
     }
 
+    pub fn push2(&mut self, values: (T, T)) {
+        let (a, b) = values;
+        self.push(a);
+        self.push(b);
+    }
+
     pub fn push(&mut self, x: T) {
         self.data.insert(0, x);
     }

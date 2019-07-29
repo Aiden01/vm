@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use crate::value::Value;
 use crate::stack::Stack;
 use crate::instruction::Instr;
+use crate::instruction::Binary;
 
 type VmEnv<'a> = HashMap<&'a str, Value<'a>>;
 type VmResult<'a, T> = Result<T, VmError<'a>>;
@@ -46,6 +47,7 @@ impl<'a> Vm<'a> {
             Instr::Store(id) => self.store(id),
             Instr::Load(id) => self.load(id),
             Instr::BuildList(n) => self.build_list(n),
+            Instr::Binary(op) => self.binary_op(op),
             _ => unreachable!()
         }
     }
@@ -67,7 +69,7 @@ impl<'a> Vm<'a> {
         self.stack.push(Value::List(elems));
         Ok(())
     }
-
+    
     fn set_pointer(&mut self, x: usize) -> VmResult<'a, ()> {
         self.pointer = x;
         Ok(())
@@ -79,6 +81,55 @@ impl<'a> Vm<'a> {
             Value::Bool(false) => self.set_pointer(to),
             Value::Bool(_) => Ok(()),
             _ => Err(VmError::MismatchedType("boolean"))
+        }
+    }
+
+    fn binary_op(&mut self, op: Binary) -> VmResult<'a, ()> {
+        let values = self.stack.pop2().ok_or(VmError::EmptyStack)?;
+        let result = match op {
+            Binary::Add => self.add(values),
+            Binary::Sub => self.sub(values),
+            Binary::Mult => self.mult(values),
+            Binary::Div => self.div(values)
+        }?;
+
+        self.stack.push(result);
+        Ok(())
+    }
+
+    fn add(&mut self, values: (Value<'a>, Value<'a>)) -> VmResult<'a, Value<'a>> {
+        match values {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a + b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float((a as f64) + b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a + b)),
+            _ => Err(VmError::MismatchedType("TODO"))
+        }
+    }
+
+    fn sub(&mut self, values: (Value<'a>, Value<'a>)) -> VmResult<'a, Value<'a>> {
+        match values {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a - b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float((a as f64) - b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a - b)),
+            _ => Err(VmError::MismatchedType("TODO"))
+        }
+    }
+
+    fn div(&mut self, values: (Value<'a>, Value<'a>)) -> VmResult<'a, Value<'a>> {
+        match values {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a * b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float((a as f64) * b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a * b)),
+            _ => Err(VmError::MismatchedType("TODO"))
+        }
+    }
+
+    fn mult(&mut self, values: (Value<'a>, Value<'a>)) -> VmResult<'a, Value<'a>> {
+        match values {
+            (Value::Int(a), Value::Int(b)) => Ok(Value::Int(a / b)),
+            (Value::Int(a), Value::Float(b)) | (Value::Float(b), Value::Int(a)) => Ok(Value::Float((a as f64) / b)),
+            (Value::Float(a), Value::Float(b)) => Ok(Value::Float(a / b)),
+            _ => Err(VmError::MismatchedType("TODO"))
         }
     }
     

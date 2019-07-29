@@ -4,5 +4,14 @@ pub enum Instr<'a> {
     JumpIfFalse(usize),
     Store(&'a str),
     Load(&'a str),
-    BuildList(usize)
+    BuildList(usize),
+    Binary(Binary)
+}
+
+#[derive(Debug, Copy, Clone)]
+pub enum Binary {
+    Add,
+    Sub,
+    Mult,
+    Div
 }
