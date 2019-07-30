@@ -9,6 +9,7 @@ pub enum Instr<'a> {
     BuildList(usize),
     Binary(Binary),
     LoadConst(Value<'a>),
+    Print,
 }
 
 #[derive(Debug, Clone)]

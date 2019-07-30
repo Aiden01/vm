@@ -6,7 +6,7 @@ type Env<'a, T> = HashMap<&'a str, T>;
 pub struct Frame<'a, T> {
     pub ret_addr: usize,
     pub locals: Env<'a, T>,
-    pub data: Vec<T>
+    pub data: Vec<T>,
 }
 
 impl<'a, T: Clone> Frame<'a, T> {
@@ -14,24 +14,22 @@ impl<'a, T: Clone> Frame<'a, T> {
         Frame {
             ret_addr,
             locals: HashMap::new(),
-            data: Vec::new()
+            data: Vec::new(),
         }
     }
 }
 
 pub struct Stack<'a, T> {
-    pub frames: Vec<Frame<'a, T>>
+    pub frames: Vec<Frame<'a, T>>,
 }
 
 impl<'a, T: Clone> Stack<'a, T> {
-
     pub fn new(frames: Vec<Frame<'a, T>>) -> Self {
         Stack { frames }
     }
 
     fn current_frame(&mut self) -> &mut Frame<'a, T> {
-        self.frames.last_mut()
-            .expect("Call stack is empty")
+        self.frames.last_mut().expect("Call stack is empty")
     }
 
     pub fn push(&mut self, data: T) {
@@ -75,5 +73,4 @@ impl<'a, T: Clone> Stack<'a, T> {
         let frame = self.frames.pop().expect("Call stack is empty");
         frame.ret_addr
     }
-    
 }

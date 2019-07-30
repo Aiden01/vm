@@ -49,7 +49,14 @@ impl<'a> Vm<'a> {
                 self.stack.push(val);
                 Ok(())
             }
+            Instr::Print => self.print(),
         }
+    }
+
+    fn print(&mut self) -> VmResult<'a, ()> {
+        let val = self.stack.pop().ok_or(VmError::EmptyStack)?;
+        println!("{:?}", val);
+        Ok(())
     }
 
     fn store(&mut self, id: &'a str) -> VmResult<'a, ()> {
