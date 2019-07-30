@@ -55,7 +55,7 @@ impl<'a> Vm<'a> {
 
     fn print(&mut self) -> VmResult<'a, ()> {
         let val = self.stack.pop().ok_or(VmError::EmptyStack)?;
-        println!("{:?}", val);
+        println!("{}", val);
         Ok(())
     }
 
