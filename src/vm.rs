@@ -1,38 +1,35 @@
-use std::collections::HashMap;
-
 use crate::instruction::Binary;
 use crate::instruction::Instr;
-use crate::stack::Stack;
+use crate::stack::{Frame, Stack};
 use crate::value::Value;
 
-type VmEnv<'a> = HashMap<&'a str, Value<'a>>;
 type VmResult<'a, T> = Result<T, VmError<'a>>;
 
 #[derive(Debug)]
-enum VmError<'a> {
+pub enum VmError<'a> {
     NotInScope(&'a str),
     MismatchedType(&'a str),
     EmptyStack,
 }
 
 pub struct Vm<'a> {
-    env: VmEnv<'a>,
-    stack: Stack<Value<'a>>,
+    stack: Stack<'a, Value<'a>>,
     pointer: usize,
 }
 
 impl<'a> Vm<'a> {
     pub fn new() -> Self {
         Vm {
-            env: HashMap::new(),
             stack: Stack::new(Vec::new()),
             pointer: 0,
         }
     }
 
     pub fn run(&mut self, instrs: Vec<Instr<'a>>) -> VmResult<'a, ()> {
+        let frame = Frame::new(instrs.len());
+        self.stack.frames.push(frame);
         while self.pointer < instrs.len() {
-            let instr = instrs[self.pointer];
+            let instr = instrs[self.pointer].clone();
             self.pointer += 1;
             self.run_instr(instr)?;
         }
@@ -47,19 +44,23 @@ impl<'a> Vm<'a> {
             Instr::Load(id) => self.load(id),
             Instr::BuildList(n) => self.build_list(n),
             Instr::Binary(op) => self.binary_op(op),
-            _ => unreachable!(),
+            Instr::JumpIfFalse(x) => self.jump_if_false(x),
+            Instr::LoadConst(val) => {
+                self.stack.push(val);
+                Ok(())
+            }
         }
     }
 
     fn store(&mut self, id: &'a str) -> VmResult<'a, ()> {
         let val = self.stack.pop().ok_or(VmError::EmptyStack)?;
-        self.env.insert(id, val);
+        self.stack.store_local(id, val);
         Ok(())
     }
 
     fn load(&mut self, id: &'a str) -> VmResult<'a, ()> {
-        let val = self.env.get(id).ok_or(VmError::NotInScope(id))?;
-        self.stack.push(val.clone());
+        let val = self.stack.get_local(id).ok_or(VmError::NotInScope(id))?;
+        self.stack.push(val);
         Ok(())
     }
 
@@ -71,6 +72,12 @@ impl<'a> Vm<'a> {
 
     fn set_pointer(&mut self, x: usize) -> VmResult<'a, ()> {
         self.pointer = x;
+        Ok(())
+    }
+
+    fn ret(&mut self) -> VmResult<'a, ()> {
+        let ptr = self.stack.ret();
+        self.pointer = ptr;
         Ok(())
     }
 

@@ -1,4 +1,6 @@
-#[derive(Debug, Copy, Clone)]
+use crate::value::Value;
+
+#[derive(Debug, Clone)]
 pub enum Instr<'a> {
     Jump(usize),
     JumpIfFalse(usize),
@@ -6,9 +8,10 @@ pub enum Instr<'a> {
     Load(&'a str),
     BuildList(usize),
     Binary(Binary),
+    LoadConst(Value<'a>),
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Clone)]
 pub enum Binary {
     Add,
     Sub,
